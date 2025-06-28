@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fornotes Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library untuk merender Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7faff;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Styles for Login Page */
+    #login-view {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-logo {
+      background-color: #4B4DFF;
+      color: white;
+      font-weight: 600;
+      font-size: 20px;
+      border-radius: 16px;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .login-container h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .login-subtitle {
+      font-size: 0.9rem;
+      color: #111;
+      margin-bottom: 32px;
+    }
+    .login-subtitle a {
+      color: #111;
+      text-decoration: underline;
+    }
+    .login-container input[type="text"], .login-container input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #4B4DFF;
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: background-color 0.3s ease;
+    }
+    .login-btn:hover { background-color: #3739cc; }
+
+    /* Styles for Dashboard */
+    #dashboard-wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px;}
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+    .sidebar {
+      background-color: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 1px 0 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .main-content {
+        display: flex;
+        overflow-y: auto;
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .note-list {
+      border-right: 1px solid #e5e7eb;
+      background-color: #ffffff;
+    }
+
+    .note-card {
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .note-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: #4B4DFF;
+    }
+    .note-card.active {
+        border-left: 4px solid #4B4DFF;
+        border-color: #4B4DFF;
+    }
+
+    .category-folder {
+      padding: 12px;
+      background: #f3f4f6;
+      border-radius: 8px;
+    }
+    
+    .note-in-folder {
+        padding: 8px;
+        background-color: white;
+        border-radius: 4px;
+        margin-top: 4px;
+        cursor: pointer;
+    }
+    
+    @keyframes pulse-animation {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .is-recording {
+      animation: pulse-animation 1.5s infinite;
+    }
+
+    .chat-bubble-bot pre {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9em;
+    }
+    .chat-bubble-bot code {
+        background-color: #e2e8f0;
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        border-radius: 3px;
+    }
+    .chat-bubble-bot pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    .chat-bubble-bot ul, .chat-bubble-bot ol {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+     .chat-bubble-bot li {
+        margin-bottom: 0.25rem;
+    }
+    .chat-bubble-bot blockquote {
+        border-left: 4px solid #d1d5db;
+        padding-left: 1rem;
+        margin-left: 0;
+        color: #6b7280;
+    }
+
+    .modal-backdrop {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none; justify-content: center; align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .color-input-wrapper {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+    }
+    .color-input-wrapper input[type="color"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .color-input-wrapper .material-icons {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+    
+  </style>
+</head>
+<body class="bg-gray-50">
+  
+  <!-- Login View -->
+  <div id="login-view">
+    <div class="login-container">
+      <div class="login-logo">Fn</div>
+      <h1>Sign in</h1>
+      <p class="login-subtitle">
+        Enter your credentials to access the dashboard.
+      </p>
+      <input id="username-input" type="text" placeholder="Username">
+      <input id="password-input" type="password" placeholder="Password">
+      <div id="login-error" class="text-red-500 text-sm mb-4 h-5"></div>
+      <button class="login-btn" onclick="handleLogin()">Continue</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Wrapper -->
+  <div id="dashboard-wrapper" class="hidden relative">
+      <!-- Sidebar -->
+      <div id="sidebar" class="sidebar absolute lg:relative -translate-x-full lg:translate-x-0 flex flex-col p-4 w-64 lg:p-6 flex-shrink-0 h-full z-20">
+        <div class="flex-grow space-y-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold text-gray-800 no-underline">Fornotes</a>
+                <button onclick="toggleSidebar()" class="p-2 lg:hidden">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 cursor-pointer mt-4" onclick="showView('profile')">
+              <img src="https://img.icons8.com/color/96/user-male-circle--v1.png" alt="User" class="w-12 h-12 rounded-full" />
+              <div>
+                <h4 id="sidebar-username" class="font-semibold text-gray-800">Jamaluden</h4>
+                <p id="sidebar-email" class="text-sm text-gray-500">Jamal@gmail.com</p>
+              </div>
+            </div>
+            <input type="text" class="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Search..." />
+            <div class="space-y-2">
+                <button onclick="showView('notes')" class="w-full flex items-center gap-3 px-4 py-2 text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors">
+                    <span class="material-icons">note</span>Note
+                </button>
+                <button onclick="showView('ai')" class="w-full flex items-center gap-3 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                    <span class="material-icons">smart_toy</span>AI Chat
+                </button>
+            </div>
+        </div>
+        <div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-3 px-4 py-2 text-red-500 bg-red-100 rounded-lg hover:bg-red-200 transition-colors">
+                <span class="material-icons">logout</span>Logout
+            </button>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div id="main-content" class="main-content w-full flex-grow flex-col">
+        <!-- Header for all views -->
+        <header class="p-4 bg-white border-b flex items-center lg:hidden">
+            <button id="menu-toggle-btn" onclick="toggleSidebar()" class="p-2">
+                <span class="material-icons">menu</span>
+            </button>
+            <a href="#" class="text-xl font-bold text-gray-800 ml-4 no-underline">Fornotes</a>
+        </header>
+
+          <!-- Notes View -->
+          <div id="notes-view" class="flex w-full h-full flex-col lg:flex-row">
+            <div class="note-list w-full lg:w-80 flex-shrink-0 p-4 lg:p-6 overflow-y-auto border-b lg:border-r lg:border-b-0">
+              <h2 class="text-xl font-bold text-gray-800 mb-2">Recent Notes</h2>
+              <div id="notesContainer" class="flex lg:block space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-x-hidden pb-4"></div>
+              <hr class="my-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">Categories</h3>
+              <div id="categoriesList" class="flex lg:block space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-x-hidden pb-4"></div>
+               <button onclick="showCategoryModal()" class="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors">
+                    <span class="material-icons text-base">add</span>Tambah Kategori
+                </button>
+            </div>
+            <div class="note-editor flex-grow flex flex-col p-4 lg:p-6 gap-4">
+              <input class="text-2xl lg:text-3xl font-bold text-gray-800 bg-transparent outline-none" id="noteTitle" type="text" placeholder="Title" />
+              <textarea class="flex-grow w-full p-4 text-base text-gray-700 bg-white border border-gray-300 rounded-lg outline-none resize-none focus:ring-2 focus:ring-indigo-400" id="noteContent" placeholder="Start Writing Here..."></textarea>
+              <div class="flex items-center flex-wrap gap-2 lg:gap-4 mt-2">
+                <button class="px-5 py-2 text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors shadow-sm" onclick="saveNote()">Save Note</button>
+                <!-- Font and Color Controls -->
+                <select id="font-weight-select" onchange="changeFontWeight(event)" class="px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <option value="400">Normal</option>
+                    <option value="600">Semi Bold</option>
+                    <option value="700">Bold</option>
+                </select>
+                <div class="color-input-wrapper">
+                    <span class="material-icons text-gray-600">format_color_fill</span>
+                    <input type="color" id="bg-color-input" value="#FFFFFF" oninput="changeBackgroundColor(event)">
+                </div>
+                <button id="voice-note-btn" class="p-3 text-white bg-red-500 rounded-full hover:bg-red-600 transition-colors ml-auto" onclick="toggleRecording()">
+                  <span class="material-icons align-middle">keyboard_voice</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- AI Chat View -->
+          <div id="ai-chat-view" class="hidden w-full h-full p-4 lg:p-8 flex-col">
+              <h1 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">Ask AI</h1>
+              <div class="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col flex-grow p-4 overflow-hidden">
+                  <div id="chatMessages" class="flex-grow overflow-y-auto p-2 bg-gray-50 rounded-md mb-3 flex flex-col gap-3"></div>
+                  <div class="flex gap-2 mt-auto">
+                      <input type="text" id="aiInput" placeholder="Type your message..." class="flex-1 w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                      <button onclick="askGemini()" class="px-4 py-2 text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors">Send</button>
+                      <button onclick="newChat()" class="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">New</button>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Profile View -->
+          <div id="profile-view" class="hidden w-full h-full p-4 lg:p-8 flex-col items-center justify-center">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center w-full max-w-md">
+                <img src="https://img.icons8.com/color/96/user-male-circle--v1.png" alt="User" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-indigo-200" />
+                <div class="flex items-center gap-2 justify-center mb-2">
+                    <input type="text" id="profile-username-input" class="text-2xl font-bold text-gray-800 text-center bg-transparent border-b-2 border-transparent focus:border-indigo-500 focus:outline-none transition" disabled>
+                    <button id="edit-username-btn" onclick="toggleUsernameEdit()" class="p-1 text-gray-500 hover:text-indigo-600">
+                        <span class="material-icons">edit</span>
+                    </button>
+                </div>
+                <p id="profile-email" class="text-gray-500 mb-6"></p>
+                <div class="text-left space-y-4">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600">Total Notes</label>
+                        <p id="profile-total-notes" class="text-lg text-gray-800">0</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600">Total Categories</label>
+                        <p id="profile-total-categories" class="text-lg text-gray-800">0</p>
+                    </div>
+                </div>
+                 <button onclick="goBack()" class="mt-8 w-full px-4 py-2 text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors">
+                    Kembali
+                </button>
+            </div>
+          </div>
+
+          <!-- Category Notes View -->
+          <div id="category-notes-view" class="hidden w-full h-full p-4 lg:p-8 flex-col">
+              <div class="flex items-center mb-4">
+                <button onclick="showView('notes')" class="p-2 mr-2 text-gray-600 hover:bg-gray-200 rounded-full">
+                    <span class="material-icons">arrow_back</span>
+                </button>
+                <h1 id="category-notes-title" class="text-2xl lg:text-3xl font-bold text-gray-800">Category Notes</h1>
+              </div>
+              <div id="category-notes-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+          </div>
+      </div>
+  </div>
+
+
+  <!-- Modal for adding/editing category -->
+    <div id="categoryModal" class="modal-backdrop">
+        <div class="modal-content">
+            <h3 id="category-modal-title" class="text-lg font-bold mb-4">New Category</h3>
+            <div id="category-name-section">
+                <input type="text" id="categoryInput" placeholder="Enter category name" class="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg mb-4">
+            </div>
+            <div id="note-selection-section" class="hidden">
+                 <h4 class="font-semibold mb-2">Select notes to add:</h4>
+                 <div id="notes-for-category-list" class="max-h-60 overflow-y-auto border rounded-lg p-2 space-y-2">
+                     <!-- Note checkboxes will be inserted here -->
+                 </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button onclick="hideCategoryModal()" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button id="category-modal-save" onclick="addCategory()" class="px-4 py-2 bg-indigo-500 text-white rounded-lg">Create</button>
+            </div>
+        </div>
+    </div>
+
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let user = { name: "Jamaluden", email: "Jamal@gmail.com"};
+    let notes = [];
+    let categories = [];
+    let recognition;
+    let selectedNoteIndex = null;
+    let chatHistory = [];
+    let isRecording = false;
+    let isEditingUsername = false;
+    let editingCategoryIndex = null;
+    let currentView = 'notes';
+    let previousView = 'notes';
+
+    // --- DOM ELEMENTS ---
+    const loginView = document.getElementById('login-view');
+    const dashboardWrapper = document.getElementById('dashboard-wrapper');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const sidebarUsername = document.getElementById('sidebar-username');
+    const sidebarEmail = document.getElementById('sidebar-email');
+    const profileUsernameInput = document.getElementById('profile-username-input');
+    const profileEmail = document.getElementById('profile-email');
+    const editUsernameBtn = document.getElementById('edit-username-btn');
+    const titleInput = document.getElementById('noteTitle');
+    const contentInput = document.getElementById('noteContent');
+    const notesContainer = document.getElementById('notesContainer');
+    const categoriesList = document.getElementById('categoriesList');
+    const categoryNotesContainer = document.getElementById('category-notes-container');
+    const categoryNotesTitle = document.getElementById('category-notes-title');
+    const voiceNoteBtn = document.getElementById('voice-note-btn');
+    const notesView = document.getElementById('notes-view');
+    const aiChatView = document.getElementById('ai-chat-view');
+    const profileView = document.getElementById('profile-view');
+    const categoryNotesView = document.getElementById('category-notes-view');
+    const chatMessagesContainer = document.getElementById('chatMessages');
+    const aiInput = document.getElementById('aiInput');
+    const fontWeightSelect = document.getElementById('font-weight-select');
+    const bgColorInput = document.getElementById('bg-color-input');
+    const categoryModal = document.getElementById('categoryModal');
+    const categoryModalTitle = document.getElementById('category-modal-title');
+    const categoryNameSection = document.getElementById('category-name-section');
+    const noteSelectionSection = document.getElementById('note-selection-section');
+    const notesForCategoryList = document.getElementById('notes-for-category-list');
+    const categoryModalSaveBtn = document.getElementById('category-modal-save');
+    
+    // --- LOGIN & AUTH ---
+    function handleLogin() {
+        const usernameInput = document.getElementById('username-input');
+        const passwordInput = document.getElementById('password-input');
+        const errorDiv = document.getElementById('login-error');
+
+        if (usernameInput.value === 'admin' && passwordInput.value === 'admin') {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            checkAuth();
+        } else {
+            errorDiv.textContent = "Invalid username or password.";
+            usernameInput.classList.add('border-red-500');
+            passwordInput.classList.add('border-red-500');
+        }
+    }
+
+    function logout() {
+        sessionStorage.removeItem('isLoggedIn');
+        location.reload();
+    }
+
+    function checkAuth() {
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            loginView.style.display = 'none';
+            dashboardWrapper.style.display = 'flex';
+            initializeDashboard();
+        } else {
+            loginView.style.display = 'flex';
+            dashboardWrapper.style.display = 'none';
+        }
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', checkAuth);
+
+    function initializeDashboard() {
+        const savedUser = JSON.parse(localStorage.getItem('fornotes_user'));
+        if (savedUser) user = savedUser;
+        notes = JSON.parse(localStorage.getItem('fornotes_notes')) || [];
+        categories = JSON.parse(localStorage.getItem('fornotes_categories')) || [];
+        
+        updateAllUserDisplays();
+        renderNotes();
+        renderCategories();
+        showView(currentView);
+    }
+    
+    // --- SIDEBAR TOGGLE ---
+    function toggleSidebar() {
+        sidebar.classList.toggle('-translate-x-full');
+    }
+
+    // --- VIEW NAVIGATION & USER DISPLAY ---
+    function showView(viewName) {
+        if(currentView !== 'profile' && currentView !== 'category-notes') {
+            previousView = currentView;
+        }
+        currentView = viewName;
+
+        notesView.style.display = 'none';
+        aiChatView.style.display = 'none';
+        profileView.style.display = 'none';
+        categoryNotesView.style.display = 'none';
+
+        if (viewName === 'notes') notesView.style.display = 'flex';
+        else if (viewName === 'ai') aiChatView.style.display = 'flex';
+        else if (viewName === 'profile') {
+            updateProfileStats();
+            profileView.style.display = 'flex';
+        } else if (viewName === 'category-notes') {
+            categoryNotesView.style.display = 'flex';
+        }
+        if (window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
+        }
+    }
+
+    function goBack() {
+        showView(previousView);
+    }
+    
+    function updateAllUserDisplays() {
+        sidebarUsername.textContent = user.name;
+        sidebarEmail.textContent = user.email;
+        profileUsernameInput.value = user.name;
+        profileEmail.textContent = user.email;
+    }
+
+    function updateProfileStats() {
+        document.getElementById('profile-total-notes').textContent = notes.length;
+        document.getElementById('profile-total-categories').textContent = categories.length;
+    }
+
+    function toggleUsernameEdit() {
+        isEditingUsername = !isEditingUsername;
+        if (isEditingUsername) {
+            profileUsernameInput.disabled = false;
+            profileUsernameInput.focus();
+            profileUsernameInput.select();
+            editUsernameBtn.innerHTML = `<span class="material-icons text-green-600">save</span>`;
+        } else {
+            profileUsernameInput.disabled = true;
+            user.name = profileUsernameInput.value.trim() || "User";
+            editUsernameBtn.innerHTML = `<span class="material-icons">edit</span>`;
+            persistData();
+            updateAllUserDisplays();
+        }
+    }
+
+    function persistData() {
+        localStorage.setItem('fornotes_user', JSON.stringify(user));
+        localStorage.setItem('fornotes_notes', JSON.stringify(notes));
+        localStorage.setItem('fornotes_categories', JSON.stringify(categories));
+    }
+
+    // --- NOTE STYLING ---
+    function changeFontWeight(event) {
+        contentInput.style.fontWeight = event.target.value;
+    }
+
+    function changeBackgroundColor(event) {
+        contentInput.style.backgroundColor = event.target.value;
+    }
+
+    function resetEditorStyles() {
+        contentInput.style.fontWeight = '400';
+        contentInput.style.backgroundColor = '#FFFFFF';
+        fontWeightSelect.value = '400';
+        bgColorInput.value = '#FFFFFF';
+    }
+
+
+    // --- NOTE MANAGEMENT ---
+    function saveNote() {
+      const title = titleInput.value.trim() || 'Untitled Note';
+      const content = contentInput.value;
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const fontWeight = contentInput.style.fontWeight || '400';
+      const backgroundColor = contentInput.style.backgroundColor || '#FFFFFF';
+      const noteData = { title, content, time, fontWeight, backgroundColor, id: Date.now() };
+
+      if (selectedNoteIndex !== null) {
+        const originalId = notes[selectedNoteIndex].id;
+        notes[selectedNoteIndex] = { ...noteData, id: originalId };
+      } else {
+        notes.unshift(noteData);
+      }
+      
+      selectedNoteIndex = null;
+      renderNotes();
+      persistData();
+      
+      titleInput.value = '';
+      contentInput.value = '';
+      resetEditorStyles();
+    }
+
+    function renderNotes() {
+        notesContainer.innerHTML = '';
+        if (notes.length === 0) {
+            notesContainer.innerHTML = `<p class="text-gray-500 py-4">No notes yet. Create one!</p>`;
+        } else {
+            notes.forEach((note, index) => {
+                notesContainer.appendChild(createNoteCard(note, index));
+            });
+        }
+    }
+
+    function createNoteCard(note, index) {
+        const card = document.createElement('div');
+        card.className = 'note-card lg:w-full w-48 flex-shrink-0';
+        card.style.backgroundColor = note.backgroundColor || '#FFFFFF';
+        if (notes[selectedNoteIndex]?.id === note.id) {
+            card.classList.add('active');
+        }
+        
+        card.innerHTML = `
+            <button class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded-full" onclick="deleteNote(event, ${note.id})">
+                <span class="material-icons text-lg">delete</span>
+            </button>
+            <h4 class="font-semibold text-gray-800 pr-8 truncate" style="font-weight: ${note.fontWeight || '400'}">${note.title}</h4>
+            <p class="text-sm text-gray-500">${note.time}</p>
+        `;
+        card.onclick = () => loadNoteById(note.id);
+        return card;
+    }
+
+
+    function loadNoteById(noteId) {
+        const noteIndex = notes.findIndex(n => n.id === noteId);
+        if (noteIndex === -1) return;
+        
+        const note = notes[noteIndex];
+        titleInput.value = note.title;
+        contentInput.value = note.content;
+        
+        contentInput.style.fontWeight = note.fontWeight || '400';
+        contentInput.style.backgroundColor = note.backgroundColor || '#FFFFFF';
+        fontWeightSelect.value = note.fontWeight || '400';
+        bgColorInput.value = note.backgroundColor || '#FFFFFF';
+
+        selectedNoteIndex = noteIndex;
+        renderNotes();
+        showView('notes');
+    }
+
+    function deleteNote(event, noteId) {
+      event.stopPropagation();
+      const noteIndex = notes.findIndex(n => n.id === noteId);
+      if (noteIndex === -1) return;
+
+      // Also remove from any category
+      categories.forEach(cat => {
+          cat.notes = cat.notes.filter(note => note.id !== noteId);
+      });
+
+      if(selectedNoteIndex === noteIndex){
+        titleInput.value = '';
+        contentInput.value = '';
+        selectedNoteIndex = null;
+        resetEditorStyles();
+      }
+      notes.splice(noteIndex, 1);
+      
+      // Re-render all relevant views
+      renderNotes();
+      renderCategories();
+      if(currentView === 'category-notes') {
+          const activeCategory = categories.find(c => c.name === categoryNotesTitle.textContent.replace('Category: ',''));
+          if(activeCategory) {
+              const activeCategoryIndex = categories.indexOf(activeCategory);
+              showCategoryNotesView(activeCategoryIndex);
+          }
+      }
+      persistData();
+    }
+    
+    // --- CATEGORY MANAGEMENT ---
+    function showCategoryModal() {
+        editingCategoryIndex = null;
+        categoryModalTitle.textContent = "New Category";
+        categoryModalSaveBtn.textContent = "Create";
+        categoryNameSection.style.display = 'block';
+        noteSelectionSection.style.display = 'none';
+        document.getElementById('categoryInput').value = '';
+        categoryModalSaveBtn.onclick = addCategory;
+        categoryModal.style.display = 'flex';
+        
+    }
+
+    function hideCategoryModal() {
+        categoryModal.style.display = 'none';
+    }
+
+    function addCategory() {
+      const input = document.getElementById('categoryInput');
+      const name = input.value.trim();
+      if (name) {
+        categories.push({ name, notes: [] });
+        renderCategories();
+        persistData();
+        hideCategoryModal();
+      }
+    }
+    
+    function openNoteSelection(event, index) {
+        event.stopPropagation();
+        editingCategoryIndex = index;
+        const category = categories[index];
+        
+        categoryModalTitle.textContent = `Manage Notes in "${category.name}"`;
+        categoryNameSection.style.display = 'none';
+        noteSelectionSection.style.display = 'block';
+
+        notesForCategoryList.innerHTML = '';
+        if (notes.length === 0) {
+            notesForCategoryList.innerHTML = `<p class="text-sm text-gray-500">No notes available to add.</p>`;
+        } else {
+             notes.forEach((note) => {
+                const isChecked = category.notes.some(catNote => catNote.id === note.id);
+                const listItem = document.createElement('label');
+                listItem.className = 'flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer';
+                listItem.innerHTML = `
+                    <input type="checkbox" data-note-id="${note.id}" class="rounded" ${isChecked ? 'checked' : ''}>
+                    <span>${note.title}</span>
+                `;
+                notesForCategoryList.appendChild(listItem);
+            });
+        }
+        
+        categoryModalSaveBtn.textContent = "Save Changes";
+        categoryModalSaveBtn.onclick = saveCategoryNotes;
+        categoryModal.style.display = 'flex';
+    }
+
+    function saveCategoryNotes() {
+        const category = categories[editingCategoryIndex];
+        const selectedNoteIds = Array.from(notesForCategoryList.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(checkbox => parseInt(checkbox.dataset.noteId));
+
+        category.notes = notes.filter(note => selectedNoteIds.includes(note.id));
+        
+        renderCategories();
+        persistData();
+        hideCategoryModal();
+    }
+
+
+    function renderCategories() {
+      categoriesList.innerHTML = '';
+       if (categories.length === 0) {
+            categoriesList.innerHTML = `<p class="text-gray-500 py-4">No categories. Create one.</p>`;
+        } else {
+            categories.forEach((cat, i) => {
+                categoriesList.appendChild(createCategoryFolder(cat, i));
+            });
+        }
+    }
+
+    function createCategoryFolder(cat, index) {
+        const folder = document.createElement('div');
+        folder.className = 'category-folder lg:w-full w-48 flex-shrink-0 cursor-pointer p-3';
+        folder.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2 overflow-hidden">
+                <span class="material-icons text-indigo-500">folder</span>
+                <h4 class="font-semibold text-gray-700 truncate">${cat.name} (${cat.notes.length})</h4>
+            </div>
+            <div>
+                 <button onclick="openNoteSelection(event, ${index})" class="p-1 text-gray-500 hover:text-indigo-600 rounded-full">
+                    <span class="material-icons text-base">settings</span>
+                </button>
+                <button onclick="deleteCategory(event, ${index})" class="p-1 text-gray-500 hover:text-red-500 rounded-full">
+                    <span class="material-icons text-lg">delete_outline</span>
+                </button>
+            </div>
+          </div>
+        `;
+        folder.onclick = () => showCategoryNotesView(index);
+        return folder;
+    }
+
+    function showCategoryNotesView(index) {
+        const category = categories[index];
+        categoryNotesTitle.textContent = `Category: ${category.name}`;
+        categoryNotesContainer.innerHTML = '';
+        if (category.notes.length === 0) {
+            categoryNotesContainer.innerHTML = `<p class="text-gray-500 col-span-full">No notes in this category.</p>`;
+        } else {
+            category.notes.forEach(note => {
+                const noteIndex = notes.findIndex(n => n.id === note.id);
+                if (noteIndex !== -1) {
+                    categoryNotesContainer.appendChild(createNoteCard(note, noteIndex));
+                }
+            });
+        }
+        showView('category-notes');
+    }
+
+
+    function deleteCategory(event, index) {
+        event.stopPropagation();
+        categories.splice(index, 1);
+        renderCategories();
+        persistData();
+    }
+    
+    // --- VOICE RECOGNITION ---
+    function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Voice recognition is not supported in your browser. Please use Google Chrome.');
+        return;
+      }
+      isRecording = true;
+      voiceNoteBtn.classList.add('is-recording');
+
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = 'id-ID';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        let final_transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                 final_transcript += event.results[i][0].transcript + ' ';
+            }
+        }
+        contentInput.value += final_transcript;
+      };
+
+      recognition.onerror = (event) => { 
+        console.error('Speech Recognition Error:', event.error); 
+        isRecording = false;
+        voiceNoteBtn.classList.remove('is-recording');
+      };
+      
+      recognition.onend = () => {
+        isRecording = false;
+        voiceNoteBtn.classList.remove('is-recording');
+      };
+
+      recognition.start();
+    }
+
+    function stopRecording() {
+      if (recognition) {
+        recognition.stop();
+        isRecording = false;
+        voiceNoteBtn.classList.remove('is-recording');
+      }
+    }
+
+    // --- AI CHAT (GEMINI) ---
+    async function askGemini() {
+      const userText = aiInput.value.trim();
+      if (!userText) return;
+
+      addMessageToChat('user', userText);
+      chatHistory.push({ role: 'user', parts: [{ text: userText }] });
+      aiInput.value = '';
+      aiInput.focus();
+
+      const botBubble = addMessageToChat('model', 'Typing...');
+      
+      try {
+        const apiKey = "AIzaSyDxLMcIdxoF3HuLcP5rsx6JDQ375gU_7Rw"; // Kunci API ditangani oleh lingkungan.
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: chatHistory })
+        });
+        
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+        
+        const result = await response.json();
+        const aiReply = result.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+        
+        botBubble.innerHTML = marked.parse(aiReply);
+        
+        chatHistory.push({ role: 'model', parts: [{ text: aiReply }] });
+      } catch (error) {
+        botBubble.textContent = `Error: ${error.message}`;
+        console.error("Error fetching from Gemini API:", error);
+      }
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function addMessageToChat(role, text) {
+        const bubble = document.createElement('div');
+        bubble.className = 'p-3 rounded-lg max-w-[85%] break-words';
+
+        if (role === 'user') {
+            bubble.classList.add('bg-indigo-500', 'text-white', 'self-end');
+            bubble.textContent = text;
+        } else {
+            bubble.classList.add('bg-gray-200', 'text-gray-800', 'self-start', 'chat-bubble-bot');
+            bubble.innerHTML = text;
+        }
+        chatMessagesContainer.appendChild(bubble);
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        return bubble;
+    }
+
+    function newChat() {
+      chatHistory = [];
+      chatMessagesContainer.innerHTML = '';
+      aiInput.value = '';
+      aiInput.focus();
+    }
+  </script>
+</body>
+</html>

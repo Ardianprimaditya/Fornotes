@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Organize your thoughts, notes, and plans in one smart workspace with Fornotes." />
+  <title>Fornotes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Angkor&family=Crimson+Text:wght@400;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #fff;
+      color: #111;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      flex-wrap: wrap;
+    }
+
+    .left-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-family: 'Angkor', serif;
+      font-size: 1.8rem;
+      margin-right: 30px;
+    }
+
+    nav a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #111;
+      font-size: 1rem;
+      transition: color 0.3s ease, text-decoration 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #4B4DFF;
+      text-decoration: underline;
+    }
+
+    .nav-group {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-login {
+      background: transparent;
+      border: 2px solid #000;
+      color: #000;
+      margin-right: 10px;
+    }
+
+    .btn-login:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .btn-started {
+      background: #4B4DFF;
+      color: white;
+    }
+
+    .btn-started:hover {
+      background: #3739cc;
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px 80px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 6vw, 3rem);
+      font-family: 'Crimson Text', serif;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .highlight {
+      color: #4B4DFF;
+      font-weight: 700;
+    }
+
+    p.subtext {
+      font-size: 1.15rem;
+      max-width: 700px;
+      margin: 0 auto 50px;
+      color: #333;
+    }
+
+    .btn-main {
+      background: #4B4DFF;
+      color: white;
+      padding: 14px 36px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      border: none;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .btn-main:hover {
+      background: #3739cc;
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 60px 20px;
+      gap: 40px;
+      text-align: center;
+    }
+
+    .feature-box {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .feature-box img {
+      width: 48px;
+      margin-bottom: 15px;
+    }
+
+    .feature-box h3 {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p {
+      font-size: 0.95rem;
+      color: #444;
+    }
+
+    .why-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 60px 20px;
+      gap: 50px;
+    }
+
+    .why-text {
+      max-width: 500px;
+      font-size: 1rem;
+    }
+
+    .why-text h2 {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    .why-text p {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .why-image img {
+      max-width: 300px;
+      width: 100%;
+      height: auto;
+    }
+
+    footer {
+      padding: 30px 5%;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #ddd;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-logo {
+      font-family: 'Angkor', serif;
+      font-size: 1.5rem;
+    }
+
+    .social-icons img {
+      width: 24px;
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+      .btn {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+      }
+
+      .btn-main {
+        font-size: 1rem;
+        padding: 12px 28px;
+      }
+
+      .feature-box {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .why-text,
+      .why-image {
+        text-align: center;
+      }
+
+      .footer-logo,
+      .social-icons {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+
+      footer {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="left-header">
+      <div class="logo">FORNOTES</div>
+      <nav>
+        <a href="#why">Why Fornotes</a>
+        <a href="#">Explore</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <button class="btn btn-login" onclick="window.location.href='Hs.html'">Log in</button>
+      <button class="btn btn-started" onclick="window.location.href='SignUp.html'">Get Started</button>
+    </div>
+  </header>
+
+  <main>
+    <h1>What are you</h1>
+    <h1><span class="highlight">thinking</span> about today?</h1>
+    <p class="subtext">Organize your ideas, plan your day, and get things done all in one smart workspace.</p>
+    <button class="btn-main">Get Fornotes For Free</button>
+  </main>
+
+  <section class="features">
+    <div class="feature-box">
+      <img src="https://img.icons8.com/?size=100&id=zx8zW4QUPydx&format=png&color=000000" alt="Note Categories Icon" />
+      <h3>Note Categories</h3>
+      <p>Organize your notes by topic. Easy to sort, easier to find.</p>
+    </div>
+    <div class="feature-box">
+      <img src="https://img.icons8.com/?size=100&id=BFpD7oAb1T9k&format=png&color=000000" alt="Text Notes Icon" />
+      <h3>Text Notes</h3>
+      <p>Write down ideas quickly, anytime.</p>
+    </div>
+    <div class="feature-box">
+      <img src="https://img.icons8.com/?size=100&id=0bf76Y0iTJuZ&format=png&color=000000" alt="Voice Notes Icon" />
+      <h3>Voice Notes</h3>
+      <p>Record your thoughts on the go.</p>
+    </div>
+    <div class="feature-box">
+      <img src="https://img.icons8.com/?size=100&id=PqmMarnLOOIa&format=png&color=000000" alt="AI Chat Icon" />
+      <h3>AI Chat</h3>
+      <p>Ask anything, get smart answers instantly.</p>
+    </div>
+  </section>
+
+  <section id="why" class="why-section">
+    <div class="why-text">
+      <h2>Why Fornotes?</h2>
+      <p>Never lose a great idea again. With Fornotes, you can capture every thought whether it’s typed, spoken, or snapped through a note or a voice file. It's one hub for all things idea-driven. From quick to-dos to deep reflections, access your notes anywhere, anytime, across devices. With clean, minimal interfaces, designed for focus, Fornotes helps you stay clear, and your mind stays free.</p>
+    </div>
+    <div class="why-image">
+      <img src="aset.png" alt="Illustration" />
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">FORNOTES</div>
+    <div class="social-icons">
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/000000/youtube-play.png" alt="YouTube" /></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/000000/instagram-new.png" alt="Instagram" /></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Facebook" /></a>
+    </div>
+  </footer>
+</body>
+
+</html>
